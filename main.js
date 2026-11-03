@@ -18,9 +18,11 @@ client.connect()
     .then(() => console.log('Database connected'))
     .catch(err => console.log('Connection failed:', err.message));
 
-app.get('/', async (req, res) => {
+    app.use(express.static('public'));
+
+app.get('/data', async (req, res) => {
     const data = await client.query('SELECT * FROM main');
     res.json(data.rows);
 });
 
-app.listen(3000);
+app.listen(process.env.PORT || 3000);
