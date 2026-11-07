@@ -6,7 +6,9 @@ console.log('ENV loaded:', !!process.env.DATABASE_URL);
 const express = require('express');
 const { Client } = require('pg');
 
+
 const app = express();
+app.use(express.json()); // Add this line to parse JSON request bodies
 
 const client = new Client({
     connectionString: process.env.DATABASE_URL
@@ -21,8 +23,27 @@ client.connect()
     app.use(express.static('public'));
 
 app.get('/data', async (req, res) => {
-    const data = await client.query('SELECT * FROM main');
+    const data = await client.query('SELECT * FROM secondmain');
     res.json(data.rows);
+});
+
+app.post('/data', async (req, res) => {
+    const { who,what } = req.body;
+    await client.query('INSERT INTO secondmain (who, what) VALUES ($1, $2)', [who, what]);
+    //await client.query('DROP TABLE IF EXISTS "secondMain"');
+    res.sendStatus(200);
+});
+
+app.patch('/data/:id', async (req, res) => {
+    const id = req.params.id;
+    const { who, what } = req.body;
+
+    await client.query(
+        'UPDATE secondmain SET who = $1, what = $2 WHERE id = $3',
+        [who, what, id]
+    );
+
+    res.sendStatus(200);
 });
 
 app.listen(process.env.PORT || 3000);

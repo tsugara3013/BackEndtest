@@ -26,3 +26,83 @@ button.addEventListener('click', () => {
         boolClicked = false;
     }
 });
+
+let inputBox = document.querySelector('.inputBox');
+let postButton = document.querySelector('.btn2');
+
+postButton.addEventListener('click', async () => {
+    await fetch('/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+            {   
+                who: inputBox.value,
+                what: "filler"
+            })
+    });
+});
+
+function createDivs() {
+    databaseData.forEach(row => {
+        const div = document.createElement('div');
+        const whoDiv = document.createElement('div');
+        const whatDiv = document.createElement('div');
+        const button = document.createElement('button');
+
+        div.id = row.id;
+        div.className = 'dataRow';
+        whatDiv.className = 'whatDiv';
+
+        whoDiv.textContent = row.who;
+        whatDiv.textContent = row.what;
+        button.textContent = 'Edit';
+
+        let isEditing = false;
+
+        button.addEventListener('click', async () => {
+            if (!isEditing) {
+                isEditing = true;
+
+                const parent = button.parentElement;
+                const whatDiv = parent.querySelector('.whatDiv');
+
+                const input = document.createElement('input');
+                input.value = whatDiv.textContent;
+
+                whatDiv.replaceWith(input);
+
+                button.textContent = 'Save';
+                return;
+            }
+            else {
+
+                const input = button.parentElement.querySelector('input');
+                const newValue = input.value;
+                const response = await fetch(`/data/${row.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        who: row.who,
+                        what: newValue
+                    })
+                });
+
+                input.replaceWith(whatDiv);
+                whatDiv.textContent = newValue;
+
+                if (!response.ok) return;
+
+                isEditing = false;
+                button.textContent = 'Edit';
+            }
+        });
+
+        div.appendChild(whoDiv);
+        div.appendChild(whatDiv);
+        div.appendChild(button);
+
+        document.body.appendChild(div);
+    });
+}
+
+createDivs();

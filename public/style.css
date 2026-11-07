@@ -49,3 +49,9 @@ button:hover {
     background: var(--clr-accbrown);
     outline: 1px solid var(--clr-accblue);
 }
+.dataRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr 80px;
+    gap: 10px;
+    align-items: center;
+}
