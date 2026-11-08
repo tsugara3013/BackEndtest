@@ -1,3 +1,17 @@
+const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+const socket = new WebSocket(`${protocol}//${location.host}`);
+
+socket.onopen = () => {
+    console.log('WebSocket connected!');
+};
+
+socket.onmessage = async (event) => {
+    if (event.data === 'updated') {
+        databaseData = await getData();
+        createDivs();
+    }
+};
+
 async function getData() {
     const response = await fetch('/data');
     const data = await response.json();
@@ -6,7 +20,7 @@ async function getData() {
     return data;
 }
 
-const databaseData = await getData();
+let databaseData = await getData();
 
 let changeWord = databaseData[0].what; // Assuming you want to change the text to the 'name' field of the first row
 let changeWord2 = databaseData[0].who; // Assuming you want to change the text to the 'name' field of the first row
@@ -43,6 +57,9 @@ postButton.addEventListener('click', async () => {
 });
 
 function createDivs() {
+
+    document.querySelectorAll('.dataRow').forEach(div => div.remove());
+
     databaseData.forEach(row => {
         const div = document.createElement('div');
         const whoDiv = document.createElement('div');
@@ -106,3 +123,4 @@ function createDivs() {
 }
 
 createDivs();
+

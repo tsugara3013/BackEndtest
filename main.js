@@ -23,7 +23,7 @@ client.connect()
     app.use(express.static('public'));
 
 app.get('/data', async (req, res) => {
-    const data = await client.query('SELECT * FROM secondmain');
+    const data = await client.query('SELECT * FROM secondmain ORDER BY id ASC');
     res.json(data.rows);
 });
 
@@ -43,7 +43,17 @@ app.patch('/data/:id', async (req, res) => {
         [who, what, id]
     );
 
+    wss.clients.forEach(socket => {
+        if (socket.readyState === 1) {
+            socket.send('updated');
+        }   
+    });
+
     res.sendStatus(200);
 });
 
-app.listen(process.env.PORT || 3000);
+const setupWebSocket = require('./websocket');
+
+const server = app.listen(process.env.PORT || 3000);
+
+const wss = setupWebSocket(server);
